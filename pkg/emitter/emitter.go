@@ -122,6 +122,16 @@ func (e *Emitter) Initialize(ctx context.Context, conf configuration.GlobalConfi
 		return
 	}
 
+	if e.Output == "redishash" {
+		e.Producer = createRedisHashProducer(ctx, conf.RedisTtl, conf.RedisConfig)
+		return
+	}
+
+	if e.Output == "redisjson" {
+		e.Producer = createRedisJSONProducer(ctx, conf.RedisTtl, conf.RedisConfig)
+		return
+	}
+
 	if e.Output == "mongo" || e.Output == "mongodb" {
 		e.Producer = createMongoProducer(ctx, conf.MongoConfig)
 		return
@@ -207,6 +217,22 @@ func (e *Emitter) Run(ctx context.Context, num int, o any) {
 
 func createRedisProducer(_ context.Context, ttl time.Duration, redisConfig string) Producer {
 	rProducer := &redis.Producer{
+		Ttl: ttl,
+	}
+	rProducer.Initialize(redisConfig)
+	return rProducer
+}
+
+func createRedisHashProducer(_ context.Context, ttl time.Duration, redisConfig string) Producer {
+	rProducer := &redis.HashProducer{
+		Ttl: ttl,
+	}
+	rProducer.Initialize(redisConfig)
+	return rProducer
+}
+
+func createRedisJSONProducer(_ context.Context, ttl time.Duration, redisConfig string) Producer {
+	rProducer := &redis.JSONProducer{
 		Ttl: ttl,
 	}
 	rProducer.Initialize(redisConfig)
