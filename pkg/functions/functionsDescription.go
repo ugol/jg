@@ -907,7 +907,7 @@ var funcDesc = map[string]FunctionDescription{
 	"nearby_gps_into_polygon": {
 		Name:        "nearby_gps_into_polygon",
 		Category:    "address",
-		Description: "returns a random latitude longitude within a given start point, radius in meters and poligon from a GeoJson file",
+		Description: "returns a random latitude longitude within a given start point, radius in meters and polygon from a GeoJson file",
 		Parameters:  "string",
 		Localizable: false,
 		Return:      "string",
@@ -917,11 +917,21 @@ var funcDesc = map[string]FunctionDescription{
 	"nearby_gps_into_polygon_without_start": {
 		Name:        "nearby_gps_into_polygon",
 		Category:    "address",
-		Description: "returns a random latitude longitude within a given start point, radius in meters and poligon from a GeoJson file",
+		Description: "returns a random latitude longitude within a given start point, radius in meters and polygon from a GeoJson file",
 		Parameters:  "string",
 		Localizable: false,
 		Return:      "string",
 		Example:     `jr template run --embedded '{{nearby_gps_into_polygon_without_start 10}}' --geojson testfiles/polygon.geojson`,
+		Output:      "41.8963 12.4975",
+	},
+	"nearby_gps_on_polyline": {
+		Name:        "nearby_gps_on_polyline",
+		Category:    "address",
+		Description: "returns a random latitude longitude within a given radius in meters and polyline from a GeoJson file",
+		Parameters:  "string",
+		Localizable: false,
+		Return:      "string",
+		Example:     `jr template run --embedded '{{nearby_gps_on_polyline 10}}' --geojson testfiles/polyline.geojson`,
 		Output:      "41.8963 12.4975",
 	},
 	"now_add": {

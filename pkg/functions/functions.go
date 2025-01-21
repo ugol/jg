@@ -36,7 +36,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jrnd-io/jr/pkg/constants"
 	"github.com/jrnd-io/jr/pkg/ctx"
-	geojson "github.com/paulmach/go.geojson"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -141,6 +140,7 @@ var fmap = map[string]interface{}{
 	"nearby_gps":                            NearbyGPS,
 	"nearby_gps_into_polygon":               NearbyGPSIntoPolygon,
 	"nearby_gps_into_polygon_without_start": NearbyGPSIntoPolygonWithoutStart,
+	"nearby_gps_on_polyline":                NearbyGPSOnPolyline,
 	"state":                                 State,
 	"state_at":                              StateAt,
 	"state_short":                           StateShort,
@@ -538,28 +538,89 @@ func InitCSV(csvpath string) {
 }
 
 func InitGeoJson(geojsonpath string) {
-	// Loads the csv file in the context
 	if len(geojsonpath) == 0 {
 		return
 	}
-	file, err := os.Open(geojsonpath)
-	if err != nil {
-		println("Error reading GeoJson file:", geojsonpath, "error:", err)
-		os.Exit(1)
+	// Geometry represents a GeoJSON geometry object
+	type Geometry struct {
+		Type        string          `json:"type"`
+		Coordinates json.RawMessage `json:"coordinates"`
 	}
-	defer file.Close()
 
-	var polygon struct {
-		Features   []geojson.Feature      `json:"features"`
+	// Feature represents a GeoJSON feature object
+	type Feature struct {
+		Type       string                 `json:"type"`
+		Geometry   Geometry               `json:"geometry"`
 		Properties map[string]interface{} `json:"properties"`
-		CRS        map[string]interface{} `json:"crs,omitempty"`
 	}
-	if err := json.NewDecoder(file).Decode(&polygon); err != nil {
+
+	// FeatureCollection represents a GeoJSON feature collection
+	type FeatureCollection struct {
+		Type     string    `json:"type"`
+		Features []Feature `json:"features"`
+	}
+
+	var geometry *Geometry
+
+	// Read the GeoJSON file
+	data, err := os.ReadFile(geojsonpath)
+	if err != nil {
 		println("Error decoding GeoJson file:", geojsonpath, "error:", err)
 		os.Exit(1)
 	}
 
-	geoTest := polygon.Features[0].Geometry
-	ctxgeojson := geoTest.Polygon[0]
-	ctx.JrContext.CtxGeoJson = ctxgeojson
+	// Check the type of GeoJSON object (FeatureCollection or single Feature)
+	var geoJSONType struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &geoJSONType); err != nil {
+		println("invalid GeoJSON format: %w", err)
+		os.Exit(1)
+	}
+
+	switch geoJSONType.Type {
+	case "FeatureCollection":
+		// Parse as FeatureCollection
+		var featureCollection FeatureCollection
+		if err := json.Unmarshal(data, &featureCollection); err != nil {
+			println("error parsing FeatureCollection: %w", err)
+			os.Exit(1)
+		}
+		if len(featureCollection.Features) > 0 {
+			geometry = &featureCollection.Features[0].Geometry
+		}
+	case "Feature":
+		// Parse as single Feature
+		var feature Feature
+		if err := json.Unmarshal(data, &feature); err != nil {
+			println("error parsing Feature: %w", err)
+			os.Exit(1)
+		}
+		geometry = &feature.Geometry
+	default:
+		println("unsupported GeoJSON type: %w", geoJSONType.Type)
+		os.Exit(1)
+	}
+
+	if geometry == nil {
+		println("no geometry found in GeoJSON")
+		os.Exit(1)
+	}
+
+	var coordinates [][]float64
+	switch geometry.Type {
+	case "Polygon":
+		var points [][][]float64
+		json.Unmarshal(geometry.Coordinates, &points)
+		coordinates = points[0]
+	case "LineString":
+		var points [][]float64
+		json.Unmarshal(geometry.Coordinates, &points)
+		coordinates = points
+	default:
+		println("unsupported GeoJSON type: %w", geoJSONType.Type)
+		os.Exit(1)
+	}
+
+	ctx.JrContext.CtxGeoJson = coordinates
 }

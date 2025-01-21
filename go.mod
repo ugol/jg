@@ -176,7 +176,6 @@ require (
 	github.com/invopop/jsonschema v0.12.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/paulmach/go.geojson v1.5.0
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
