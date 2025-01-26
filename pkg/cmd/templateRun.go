@@ -128,6 +128,8 @@ jr template run --template "{{name}}"
 					configuration.GlobalCfg.WASMConfig, _ = cmd.Flags().GetString(f.Name)
 				case "wampConfig":
 					configuration.GlobalCfg.WAMPConfig, _ = cmd.Flags().GetString(f.Name)
+				case "wampRpcConfig":
+					configuration.GlobalCfg.WAMPRPCConfig, _ = cmd.Flags().GetString(f.Name)
 				}
 			}
 		})
@@ -201,5 +203,6 @@ func init() {
 	templateRunCmd.Flags().String("luascriptConfig", "", "LUA Script configuration")
 	templateRunCmd.Flags().String("wasmConfig", "", "WASM configuration")
 	templateRunCmd.Flags().String("wampConfig", "", "WAMP configuration")
+	templateRunCmd.Flags().String("wampRpcConfig", "", "WAMP-RPC configuration")
 
 }

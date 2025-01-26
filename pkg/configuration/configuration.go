@@ -45,6 +45,7 @@ type GlobalConfiguration struct {
 	LUAScriptConfig     string
 	WASMConfig          string
 	WAMPConfig          string
+	WAMPRPCConfig       string
 	Url                 string
 	EmbeddedTemplate    bool
 	FileNameTemplate    bool

@@ -1,0 +1,10 @@
+{
+  "wamp_uri": "ws://localhost:9009/ws",
+  "username": "admin",
+  "password": "password",
+  "realm": "realm1",
+  "procedure": "example",
+  "serType": "json",
+  "compress": true,
+  "authid": "clientJR"
+}
